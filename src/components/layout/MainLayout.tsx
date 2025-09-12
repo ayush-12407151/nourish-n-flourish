@@ -10,7 +10,8 @@ import {
   User, 
   Menu, 
   X,
-  Sparkles
+  Sparkles,
+  HandHeart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { name: 'Pantry', href: '/pantry', icon: Package },
     { name: 'Reimaginer', href: '/reimaginer', icon: Sparkles },
     { name: 'Meal Planner', href: '/planner', icon: Calendar },
+    { name: 'Donate/Sell', href: '/donate-sell', icon: HandHeart },
     { name: 'Profile', href: '/profile', icon: User },
   ];
 

@@ -10,6 +10,7 @@ import Pantry from "./pages/Pantry";
 import Reimaginer from "./pages/Reimaginer";
 import MealPlanner from "./pages/MealPlanner";
 import Profile from "./pages/Profile";
+import DonateSell from "./pages/DonateSell";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/pantry" element={<MainLayout><Pantry /></MainLayout>} />
           <Route path="/reimaginer" element={<MainLayout><Reimaginer /></MainLayout>} />
           <Route path="/planner" element={<MainLayout><MealPlanner /></MainLayout>} />
+          <Route path="/donate-sell" element={<MainLayout><DonateSell /></MainLayout>} />
           <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

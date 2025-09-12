@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,12 +18,13 @@ import {
   Calendar, 
   AlertTriangle, 
   CheckCircle,
-  Gift,
+  HandHeart,
   Utensils,
-  Camera,
   Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CameraScanner from '@/components/CameraScanner';
+import DonateSellDialog from '@/components/DonateSellDialog';
 
 interface PantryItem {
   id: string;
@@ -35,8 +37,14 @@ interface PantryItem {
 }
 
 const Pantry = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [donateSellDialog, setDonateSellDialog] = useState<{
+    isOpen: boolean;
+    itemId: string;
+    itemName: string;
+  }>({ isOpen: false, itemId: '', itemName: '' });
   const [newItem, setNewItem] = useState({
     name: '',
     quantity: '',
@@ -120,9 +128,43 @@ const Pantry = () => {
     });
   };
 
-  const handleAction = (itemId: string, action: 'use' | 'donate' | 'sell') => {
-    console.log(`Action: ${action} on item ${itemId}`);
-    // Handle action logic here
+  const handleScanComplete = (extractedText: string) => {
+    // Parse the extracted text and auto-fill the form
+    const lines = extractedText.split('\n').filter(line => line.trim());
+    
+    // Simple parsing logic - you can enhance this
+    if (lines.length > 0) {
+      setNewItem(prev => ({
+        ...prev,
+        name: lines[0] // Use first line as item name
+      }));
+      setIsAddDialogOpen(true);
+    }
+  };
+
+  const handleUseItem = (itemId: string) => {
+    const item = pantryItems.find(i => i.id === itemId);
+    if (item) {
+      // Navigate to reimaginer with the item name as context
+      navigate(`/reimaginer?item=${encodeURIComponent(item.name)}`);
+    }
+  };
+
+  const handleDonateSell = (itemId: string) => {
+    const item = pantryItems.find(i => i.id === itemId);
+    if (item) {
+      setDonateSellDialog({
+        isOpen: true,
+        itemId,
+        itemName: item.name
+      });
+    }
+  };
+
+  const handleDonateSellComplete = (action: 'donate' | 'sell', details: any) => {
+    console.log(`${action} completed for item ${donateSellDialog.itemId}:`, details);
+    // Handle the donate/sell action here
+    setDonateSellDialog({ isOpen: false, itemId: '', itemName: '' });
   };
 
   return (
@@ -219,10 +261,7 @@ const Pantry = () => {
               </div>
               
               <div className="flex gap-3">
-                <Button variant="earth" className="flex-1 gap-2">
-                  <Camera className="h-4 w-4" />
-                  Scan Receipt
-                </Button>
+                <CameraScanner onScanComplete={handleScanComplete} />
                 <Button onClick={handleAddItem} variant="hero" className="flex-1">
                   Add Item
                 </Button>
@@ -279,7 +318,7 @@ const Pantry = () => {
                   size="sm" 
                   variant="success" 
                   className="flex-1 text-xs"
-                  onClick={() => handleAction(item.id, 'use')}
+                  onClick={() => handleUseItem(item.id)}
                 >
                   <Utensils className="h-3 w-3 mr-1" />
                   Use
@@ -288,10 +327,10 @@ const Pantry = () => {
                   size="sm" 
                   variant="fresh" 
                   className="flex-1 text-xs"
-                  onClick={() => handleAction(item.id, 'donate')}
+                  onClick={() => handleDonateSell(item.id)}
                 >
-                  <Gift className="h-3 w-3 mr-1" />
-                  Donate
+                  <HandHeart className="h-3 w-3 mr-1" />
+                  Donate/Sell
                 </Button>
               </div>
             </div>
@@ -308,6 +347,14 @@ const Pantry = () => {
           </p>
         </div>
       )}
+
+      {/* Donate/Sell Dialog */}
+      <DonateSellDialog
+        isOpen={donateSellDialog.isOpen}
+        onClose={() => setDonateSellDialog({ isOpen: false, itemId: '', itemName: '' })}
+        itemName={donateSellDialog.itemName}
+        onComplete={handleDonateSellComplete}
+      />
     </div>
   );
 };
