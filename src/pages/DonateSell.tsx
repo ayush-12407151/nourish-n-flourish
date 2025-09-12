@@ -6,57 +6,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Gift, 
   DollarSign, 
-  MapPin, 
-  Clock, 
   CheckCircle,
   Package,
   Search
 } from 'lucide-react';
+import { useDonateSell } from '@/hooks/useDonateSell';
+import { usePantry } from '@/hooks/usePantry';
 
 const DonateSell = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('available');
+  const { donations, sales, loading } = useDonateSell();
+  const { items } = usePantry();
 
-  // Mock data for items available to donate/sell
-  const availableItems = [
-    {
-      id: '1',
-      name: 'Organic Tomatoes',
-      quantity: 3,
-      unit: 'pieces',
-      expiryDate: '2025-01-15',
-      estimatedValue: 5.99
-    },
-    {
-      id: '2',
-      name: 'Whole Wheat Bread',
-      quantity: 1,
-      unit: 'loaf',
-      expiryDate: '2025-01-14',
-      estimatedValue: 3.49
-    }
-  ];
-
-  const donatedItems = [
-    {
-      id: '3',
-      name: 'Brown Rice',
-      organization: 'Local Food Bank',
-      date: '2025-01-10',
-      status: 'completed'
-    }
-  ];
-
-  const soldItems = [
-    {
-      id: '4',
-      name: 'Greek Yogurt',
-      platform: 'Facebook Marketplace',
-      price: 2.99,
-      date: '2025-01-09',
-      status: 'completed'
-    }
-  ];
+  const availableItems = items.filter(item => 
+    item.status === 'fresh' || item.status === 'expiring'
+  );
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
