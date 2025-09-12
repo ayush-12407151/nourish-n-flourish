@@ -14,7 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      donation_records: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          item_id: string | null
+          item_name: string
+          notes: string | null
+          organization: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_name: string
+          notes?: string | null
+          organization: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string | null
+          item_name?: string
+          notes?: string | null
+          organization?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_records_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pantry_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pantry_items: {
+        Row: {
+          category: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          name: string
+          quantity: number
+          status: string
+          unit: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          name: string
+          quantity?: number
+          status?: string
+          unit?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          name?: string
+          quantity?: number
+          status?: string
+          unit?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sell_records: {
+        Row: {
+          contact_method: string | null
+          created_at: string
+          description: string | null
+          id: string
+          item_id: string | null
+          item_name: string
+          platform: string
+          price: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_method?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          item_name: string
+          platform: string
+          price: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_method?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          item_name?: string
+          platform?: string
+          price?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sell_records_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pantry_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sustainability_stats: {
+        Row: {
+          co2_saved: number
+          created_at: string
+          food_saved_kg: number
+          id: string
+          items_donated: number
+          items_sold: number
+          items_used: number
+          total_items: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          co2_saved?: number
+          created_at?: string
+          food_saved_kg?: number
+          id?: string
+          items_donated?: number
+          items_sold?: number
+          items_used?: number
+          total_items?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          co2_saved?: number
+          created_at?: string
+          food_saved_kg?: number
+          id?: string
+          items_donated?: number
+          items_sold?: number
+          items_used?: number
+          total_items?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          badges: string[] | null
+          bmi: number | null
+          created_at: string
+          credits: number
+          full_name: string
+          health_goal: string | null
+          height: number | null
+          id: string
+          updated_at: string
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          badges?: string[] | null
+          bmi?: number | null
+          created_at?: string
+          credits?: number
+          full_name: string
+          health_goal?: string | null
+          height?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          badges?: string[] | null
+          bmi?: number | null
+          created_at?: string
+          credits?: number
+          full_name?: string
+          health_goal?: string | null
+          height?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
