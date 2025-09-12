@@ -62,7 +62,6 @@ const DonateSell = () => {
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium text-foreground">{item.name}</span>
                     </div>
-                    <span className="text-sm font-medium text-success">${item.estimatedValue}</span>
                   </div>
                   
                   <div className="space-y-2">
@@ -70,7 +69,7 @@ const DonateSell = () => {
                       Quantity: <span className="font-medium text-foreground">{item.quantity} {item.unit}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                      Expires: {new Date(item.expiry_date).toLocaleDateString()}
                     </p>
                   </div>
                   
@@ -92,13 +91,13 @@ const DonateSell = () => {
 
         <TabsContent value="donated" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {donatedItems.map((item) => (
+            {donations.map((item) => (
               <Card key={item.id} className="p-4 border-success/30 bg-success/5">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <Gift className="h-4 w-4 text-success" />
-                      <span className="font-medium text-foreground">{item.name}</span>
+                      <span className="font-medium text-foreground">{item.item_name}</span>
                     </div>
                     <CheckCircle className="h-4 w-4 text-success" />
                   </div>
@@ -108,7 +107,7 @@ const DonateSell = () => {
                       Donated to: <span className="font-medium text-foreground">{item.organization}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Date: {new Date(item.date).toLocaleDateString()}
+                      Date: {new Date(item.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -119,13 +118,13 @@ const DonateSell = () => {
 
         <TabsContent value="sold" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {soldItems.map((item) => (
+            {sales.map((item) => (
               <Card key={item.id} className="p-4 border-warning/30 bg-warning/5">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-warning" />
-                      <span className="font-medium text-foreground">{item.name}</span>
+                      <span className="font-medium text-foreground">{item.item_name}</span>
                     </div>
                     <span className="text-sm font-medium text-success">${item.price}</span>
                   </div>
@@ -135,7 +134,7 @@ const DonateSell = () => {
                       Platform: <span className="font-medium text-foreground">{item.platform}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Date: {new Date(item.date).toLocaleDateString()}
+                      Date: {new Date(item.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
