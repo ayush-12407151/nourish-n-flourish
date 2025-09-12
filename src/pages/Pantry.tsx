@@ -23,11 +23,18 @@ import {
   Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import CameraScanner from '@/components/CameraScanner';
 import DonateSellDialog from '@/components/DonateSellDialog';
-import { usePantry } from '@/hooks/usePantry';
-import { useDonateSell } from '@/hooks/useDonateSell';
+
+interface PantryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  expiryDate: string;
+  category: string;
+  status: 'fresh' | 'expiring' | 'expired';
+}
 
 const Pantry = () => {
   const navigate = useNavigate();
@@ -42,14 +49,51 @@ const Pantry = () => {
     name: '',
     quantity: '',
     unit: 'pieces',
-    expiry_date: '',
+    expiryDate: '',
     category: 'vegetables'
   });
 
-  const { items, loading, addItem } = usePantry();
-  const { createDonation, createSale } = useDonateSell();
+  // Mock data - replace with real data from your backend
+  const [pantryItems] = useState<PantryItem[]>([
+    {
+      id: '1',
+      name: 'Organic Tomatoes',
+      quantity: 6,
+      unit: 'pieces',
+      expiryDate: '2025-01-15',
+      category: 'vegetables',
+      status: 'fresh'
+    },
+    {
+      id: '2', 
+      name: 'Whole Wheat Bread',
+      quantity: 1,
+      unit: 'loaf',
+      expiryDate: '2025-01-14',
+      category: 'bakery',
+      status: 'expiring'
+    },
+    {
+      id: '3',
+      name: 'Brown Rice',
+      quantity: 2,
+      unit: 'kg',
+      expiryDate: '2025-06-20',
+      category: 'grains',
+      status: 'fresh'
+    },
+    {
+      id: '4',
+      name: 'Greek Yogurt',
+      quantity: 3,
+      unit: 'containers',
+      expiryDate: '2025-01-13',
+      category: 'dairy',
+      status: 'expiring'
+    }
+  ]);
 
-  const filteredItems = items.filter(item =>
+  const filteredItems = pantryItems.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -71,31 +115,17 @@ const Pantry = () => {
     }
   };
 
-  const handleAddItem = async () => {
-    if (!newItem.name || !newItem.quantity || !newItem.expiry_date) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    const result = await addItem({
-      name: newItem.name,
-      quantity: parseInt(newItem.quantity),
-      unit: newItem.unit,
-      expiry_date: newItem.expiry_date,
-      category: newItem.category,
-      status: 'fresh'
+  const handleAddItem = () => {
+    // Add item logic here
+    console.log('Adding item:', newItem);
+    setIsAddDialogOpen(false);
+    setNewItem({
+      name: '',
+      quantity: '',
+      unit: 'pieces',
+      expiryDate: '',
+      category: 'vegetables'
     });
-
-    if (result?.success) {
-      setIsAddDialogOpen(false);
-      setNewItem({
-        name: '',
-        quantity: '',
-        unit: 'pieces',
-        expiry_date: '',
-        category: 'vegetables'
-      });
-    }
   };
 
   const handleScanComplete = (extractedText: string) => {
@@ -113,7 +143,7 @@ const Pantry = () => {
   };
 
   const handleUseItem = (itemId: string) => {
-    const item = items.find(i => i.id === itemId);
+    const item = pantryItems.find(i => i.id === itemId);
     if (item) {
       // Navigate to reimaginer with the item name as context
       navigate(`/reimaginer?item=${encodeURIComponent(item.name)}`);
@@ -121,7 +151,7 @@ const Pantry = () => {
   };
 
   const handleDonateSell = (itemId: string) => {
-    const item = items.find(i => i.id === itemId);
+    const item = pantryItems.find(i => i.id === itemId);
     if (item) {
       setDonateSellDialog({
         isOpen: true,
@@ -131,37 +161,11 @@ const Pantry = () => {
     }
   };
 
-  const handleDonateSellComplete = async (action: 'donate' | 'sell', details: any) => {
-    if (action === 'donate') {
-      await createDonation({
-        itemId: donateSellDialog.itemId,
-        itemName: donateSellDialog.itemName,
-        organization: details.organization,
-        contactInfo: details.contact,
-        notes: details.notes
-      });
-    } else {
-      await createSale({
-        itemId: donateSellDialog.itemId,
-        itemName: donateSellDialog.itemName,
-        price: parseFloat(details.price),
-        platform: details.platform,
-        description: details.description,
-        contactMethod: details.contact
-      });
-    }
+  const handleDonateSellComplete = (action: 'donate' | 'sell', details: any) => {
+    console.log(`${action} completed for item ${donateSellDialog.itemId}:`, details);
+    // Handle the donate/sell action here
     setDonateSellDialog({ isOpen: false, itemId: '', itemName: '' });
   };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -233,8 +237,8 @@ const Pantry = () => {
                 <Input
                   id="expiry"
                   type="date"
-                  value={newItem.expiry_date}
-                  onChange={(e) => setNewItem({...newItem, expiry_date: e.target.value})}
+                  value={newItem.expiryDate}
+                  onChange={(e) => setNewItem({...newItem, expiryDate: e.target.value})}
                 />
               </div>
               
@@ -304,7 +308,7 @@ const Pantry = () => {
                 </p>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-3 w-3" />
-                  <span>Expires: {new Date(item.expiry_date).toLocaleDateString()}</span>
+                  <span>Expires: {new Date(item.expiryDate).toLocaleDateString()}</span>
                 </div>
               </div>
               

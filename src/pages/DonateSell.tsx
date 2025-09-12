@@ -6,22 +6,57 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Gift, 
   DollarSign, 
+  MapPin, 
+  Clock, 
   CheckCircle,
   Package,
   Search
 } from 'lucide-react';
-import { useDonateSell } from '@/hooks/useDonateSell';
-import { usePantry } from '@/hooks/usePantry';
 
 const DonateSell = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('available');
-  const { donations, sales, loading } = useDonateSell();
-  const { items } = usePantry();
 
-  const availableItems = items.filter(item => 
-    item.status === 'fresh' || item.status === 'expiring'
-  );
+  // Mock data for items available to donate/sell
+  const availableItems = [
+    {
+      id: '1',
+      name: 'Organic Tomatoes',
+      quantity: 3,
+      unit: 'pieces',
+      expiryDate: '2025-01-15',
+      estimatedValue: 5.99
+    },
+    {
+      id: '2',
+      name: 'Whole Wheat Bread',
+      quantity: 1,
+      unit: 'loaf',
+      expiryDate: '2025-01-14',
+      estimatedValue: 3.49
+    }
+  ];
+
+  const donatedItems = [
+    {
+      id: '3',
+      name: 'Brown Rice',
+      organization: 'Local Food Bank',
+      date: '2025-01-10',
+      status: 'completed'
+    }
+  ];
+
+  const soldItems = [
+    {
+      id: '4',
+      name: 'Greek Yogurt',
+      platform: 'Facebook Marketplace',
+      price: 2.99,
+      date: '2025-01-09',
+      status: 'completed'
+    }
+  ];
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -62,6 +97,7 @@ const DonateSell = () => {
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium text-foreground">{item.name}</span>
                     </div>
+                    <span className="text-sm font-medium text-success">${item.estimatedValue}</span>
                   </div>
                   
                   <div className="space-y-2">
@@ -69,7 +105,7 @@ const DonateSell = () => {
                       Quantity: <span className="font-medium text-foreground">{item.quantity} {item.unit}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Expires: {new Date(item.expiry_date).toLocaleDateString()}
+                      Expires: {new Date(item.expiryDate).toLocaleDateString()}
                     </p>
                   </div>
                   
@@ -91,13 +127,13 @@ const DonateSell = () => {
 
         <TabsContent value="donated" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {donations.map((item) => (
+            {donatedItems.map((item) => (
               <Card key={item.id} className="p-4 border-success/30 bg-success/5">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <Gift className="h-4 w-4 text-success" />
-                      <span className="font-medium text-foreground">{item.item_name}</span>
+                      <span className="font-medium text-foreground">{item.name}</span>
                     </div>
                     <CheckCircle className="h-4 w-4 text-success" />
                   </div>
@@ -107,7 +143,7 @@ const DonateSell = () => {
                       Donated to: <span className="font-medium text-foreground">{item.organization}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Date: {new Date(item.created_at).toLocaleDateString()}
+                      Date: {new Date(item.date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -118,13 +154,13 @@ const DonateSell = () => {
 
         <TabsContent value="sold" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sales.map((item) => (
+            {soldItems.map((item) => (
               <Card key={item.id} className="p-4 border-warning/30 bg-warning/5">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-warning" />
-                      <span className="font-medium text-foreground">{item.item_name}</span>
+                      <span className="font-medium text-foreground">{item.name}</span>
                     </div>
                     <span className="text-sm font-medium text-success">${item.price}</span>
                   </div>
@@ -134,7 +170,7 @@ const DonateSell = () => {
                       Platform: <span className="font-medium text-foreground">{item.platform}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Date: {new Date(item.created_at).toLocaleDateString()}
+                      Date: {new Date(item.date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
