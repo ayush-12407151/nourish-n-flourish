@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, type DonationRecord, type SellRecord } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import type { DonationRecord, SellRecord } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { usePantry } from './usePantry';
 import { toast } from 'sonner';
@@ -19,12 +20,12 @@ export const useDonateSell = () => {
     try {
       const [donationsRes, salesRes] = await Promise.all([
         supabase
-          .from('donations')
+          .from('donation_records')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
         supabase
-          .from('sales')
+          .from('sell_records')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
@@ -33,8 +34,8 @@ export const useDonateSell = () => {
       if (donationsRes.error) throw donationsRes.error;
       if (salesRes.error) throw salesRes.error;
 
-      setDonations(donationsRes.data || []);
-      setSales(salesRes.data || []);
+      setDonations((donationsRes.data as unknown as DonationRecord[]) || []);
+      setSales((salesRes.data as unknown as SellRecord[]) || []);
     } catch (error) {
       console.error('Error fetching records:', error);
       toast.error('Failed to load donation/sale records');
@@ -55,7 +56,7 @@ export const useDonateSell = () => {
 
     try {
       const { data, error } = await supabase
-        .from('donations')
+        .from('donation_records')
         .insert([{
           user_id: user.id,
           item_id: donationData.itemId,
@@ -73,7 +74,7 @@ export const useDonateSell = () => {
       // Update pantry item status
       await updateItemStatus(donationData.itemId, 'donated');
       
-      setDonations(prev => [data, ...prev]);
+      setDonations(prev => [data as unknown as DonationRecord, ...prev]);
       toast.success('Item donated successfully!');
       return { success: true, data };
     } catch (error) {
@@ -96,7 +97,7 @@ export const useDonateSell = () => {
 
     try {
       const { data, error } = await supabase
-        .from('sales')
+        .from('sell_records')
         .insert([{
           user_id: user.id,
           item_id: saleData.itemId,
@@ -115,7 +116,7 @@ export const useDonateSell = () => {
       // Update pantry item status
       await updateItemStatus(saleData.itemId, 'sold');
       
-      setSales(prev => [data, ...prev]);
+      setSales(prev => [data as unknown as SellRecord, ...prev]);
       toast.success('Item sold successfully!');
       return { success: true, data };
     } catch (error) {

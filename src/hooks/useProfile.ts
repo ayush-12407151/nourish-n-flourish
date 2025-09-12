@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, type UserProfile, type SustainabilityStats } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import type { UserProfile, SustainabilityStats } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
@@ -32,7 +33,7 @@ export const useProfile = () => {
       if (profileRes.error && profileRes.error.code === 'PGRST116') {
         await createProfile();
       } else if (profileRes.data) {
-        setProfile(profileRes.data);
+        setProfile(profileRes.data as unknown as UserProfile);
       }
 
       // Create stats if doesn't exist
@@ -65,7 +66,7 @@ export const useProfile = () => {
         .single();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data as unknown as UserProfile);
     } catch (error) {
       console.error('Error creating profile:', error);
     }
@@ -111,7 +112,7 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      setProfile(data);
+      setProfile(data as unknown as UserProfile);
       toast.success('Profile updated successfully');
       return { success: true, data };
     } catch (error) {

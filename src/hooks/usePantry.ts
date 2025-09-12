@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, type PantryItem } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import type { PantryItem } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
@@ -21,7 +22,7 @@ export const usePantry = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      setItems((data as unknown as PantryItem[]) || []);
     } catch (error) {
       console.error('Error fetching pantry items:', error);
       toast.error('Failed to load pantry items');
@@ -56,7 +57,7 @@ export const usePantry = () => {
 
       if (error) throw error;
 
-      setItems(prev => [data, ...prev]);
+      setItems(prev => [data as unknown as PantryItem, ...prev]);
       toast.success('Item added to pantry');
       return { success: true, data };
     } catch (error) {
