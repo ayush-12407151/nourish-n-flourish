@@ -16,15 +16,30 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('useAuth: Starting authentication check');
+    
+    // Check if Supabase is properly configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
+      console.log('useAuth: Supabase not configured, setting loading to false');
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('useAuth: Initial session check', { hasSession: !!session });
       setUser(session?.user as AuthUser ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('useAuth: Error getting session:', error);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('useAuth: Auth state changed', { event, hasSession: !!session });
         setUser(session?.user as AuthUser ?? null);
         setLoading(false);
       }

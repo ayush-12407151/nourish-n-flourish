@@ -3,11 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// For development: use placeholder values if env vars aren't set
+const url = supabaseUrl || 'https://placeholder.supabase.co';
+const key = supabaseAnonKey || 'placeholder-anon-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+console.log('Supabase config:', { 
+  hasUrl: !!supabaseUrl, 
+  hasKey: !!supabaseAnonKey,
+  url: url.substring(0, 20) + '...'
+});
+
+export const supabase = createClient(url, key);
 
 // Database types
 export interface PantryItem {
