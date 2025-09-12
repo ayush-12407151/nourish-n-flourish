@@ -31,24 +31,6 @@ const AppContent = () => {
     );
   }
 
-  // Check if Supabase is configured
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
-    console.log('AppContent: Supabase not configured, showing demo mode');
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-primary p-4">
-        <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-white mb-4">Setup Required</h1>
-          <p className="text-white/80 mb-4">
-            Please configure your Supabase environment variables to use the full application.
-          </p>
-          <p className="text-sm text-white/60">
-            Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (!user) {
     console.log('AppContent: No user, showing AuthForm');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 export interface AuthUser {
@@ -18,13 +18,6 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('useAuth: Starting authentication check');
     
-    // Check if Supabase is properly configured
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
-      console.log('useAuth: Supabase not configured, setting loading to false');
-      setLoading(false);
-      return;
-    }
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
