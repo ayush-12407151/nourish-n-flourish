@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthDialog } from '@/components/auth/AuthDialog';
 import { 
   Leaf, 
   Package, 
@@ -11,7 +13,8 @@ import {
   Menu, 
   X,
   Sparkles,
-  HandHeart
+  HandHeart,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +24,13 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const location = useLocation();
+  const { user, loading, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
@@ -31,6 +40,39 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { name: 'Donate/Sell', href: '/donate-sell', icon: HandHeart },
     { name: 'Profile', href: '/profile', icon: User },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="text-center space-y-6 p-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">EcoTracker</h1>
+            <p className="text-muted-foreground text-lg">
+              Track your sustainable journey, reduce food waste, and make a positive impact.
+            </p>
+          </div>
+          <Button onClick={() => setIsAuthDialogOpen(true)} size="lg" variant="hero">
+            Get Started
+          </Button>
+          <AuthDialog 
+            isOpen={isAuthDialogOpen} 
+            onClose={() => setIsAuthDialogOpen(false)} 
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-earth">
@@ -67,6 +109,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                   </Link>
                 );
               })}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="ml-2 gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
             </nav>
 
             {/* Mobile menu button */}

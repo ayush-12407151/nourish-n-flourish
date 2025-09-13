@@ -25,16 +25,9 @@ import {
 import { cn } from '@/lib/utils';
 import CameraScanner from '@/components/CameraScanner';
 import DonateSellDialog from '@/components/DonateSellDialog';
-
-interface PantryItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  expiryDate: string;
-  category: string;
-  status: 'fresh' | 'expiring' | 'expired';
-}
+import { usePantry, PantryItem } from '@/hooks/usePantry';
+import { useDonateSell } from '@/hooks/useDonateSell';
+import { toast } from 'sonner';
 
 const Pantry = () => {
   const navigate = useNavigate();
@@ -47,53 +40,16 @@ const Pantry = () => {
   }>({ isOpen: false, itemId: '', itemName: '' });
   const [newItem, setNewItem] = useState({
     name: '',
-    quantity: '',
+    quantity: 1,
     unit: 'pieces',
-    expiryDate: '',
+    expiry_date: '',
     category: 'vegetables'
   });
 
-  // Mock data - replace with real data from your backend
-  const [pantryItems] = useState<PantryItem[]>([
-    {
-      id: '1',
-      name: 'Organic Tomatoes',
-      quantity: 6,
-      unit: 'pieces',
-      expiryDate: '2025-01-15',
-      category: 'vegetables',
-      status: 'fresh'
-    },
-    {
-      id: '2', 
-      name: 'Whole Wheat Bread',
-      quantity: 1,
-      unit: 'loaf',
-      expiryDate: '2025-01-14',
-      category: 'bakery',
-      status: 'expiring'
-    },
-    {
-      id: '3',
-      name: 'Brown Rice',
-      quantity: 2,
-      unit: 'kg',
-      expiryDate: '2025-06-20',
-      category: 'grains',
-      status: 'fresh'
-    },
-    {
-      id: '4',
-      name: 'Greek Yogurt',
-      quantity: 3,
-      unit: 'containers',
-      expiryDate: '2025-01-13',
-      category: 'dairy',
-      status: 'expiring'
-    }
-  ]);
+  const { items, loading, addItem } = usePantry();
+  const { createDonation, createSale } = useDonateSell();
 
-  const filteredItems = pantryItems.filter(item =>
+  const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -115,17 +71,30 @@ const Pantry = () => {
     }
   };
 
-  const handleAddItem = () => {
-    // Add item logic here
-    console.log('Adding item:', newItem);
-    setIsAddDialogOpen(false);
-    setNewItem({
-      name: '',
-      quantity: '',
-      unit: 'pieces',
-      expiryDate: '',
-      category: 'vegetables'
+  const handleAddItem = async () => {
+    if (!newItem.name || !newItem.quantity) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const result = await addItem({
+      name: newItem.name,
+      quantity: newItem.quantity,
+      unit: newItem.unit,
+      expiry_date: newItem.expiry_date,
+      category: newItem.category
     });
+
+    if (result?.data) {
+      setIsAddDialogOpen(false);
+      setNewItem({
+        name: '',
+        quantity: 1,
+        unit: 'pieces',
+        expiry_date: '',
+        category: 'vegetables'
+      });
+    }
   };
 
   const handleScanComplete = (extractedText: string) => {
@@ -143,7 +112,7 @@ const Pantry = () => {
   };
 
   const handleUseItem = (itemId: string) => {
-    const item = pantryItems.find(i => i.id === itemId);
+    const item = items.find(i => i.id === itemId);
     if (item) {
       // Navigate to reimaginer with the item name as context
       navigate(`/reimaginer?item=${encodeURIComponent(item.name)}`);
@@ -151,7 +120,7 @@ const Pantry = () => {
   };
 
   const handleDonateSell = (itemId: string) => {
-    const item = pantryItems.find(i => i.id === itemId);
+    const item = items.find(i => i.id === itemId);
     if (item) {
       setDonateSellDialog({
         isOpen: true,
@@ -161,9 +130,29 @@ const Pantry = () => {
     }
   };
 
-  const handleDonateSellComplete = (action: 'donate' | 'sell', details: any) => {
-    console.log(`${action} completed for item ${donateSellDialog.itemId}:`, details);
-    // Handle the donate/sell action here
+  const handleDonateSellComplete = async (action: 'donate' | 'sell', details: any) => {
+    const item = items.find(i => i.id === donateSellDialog.itemId);
+    if (!item) return;
+
+    if (action === 'donate') {
+      await createDonation({
+        item_id: donateSellDialog.itemId,
+        item_name: donateSellDialog.itemName,
+        organization: details.organization,
+        contact_info: details.contactInfo,
+        notes: details.notes
+      });
+    } else {
+      await createSale({
+        item_id: donateSellDialog.itemId,
+        item_name: donateSellDialog.itemName,
+        price: parseFloat(details.price),
+        platform: details.platform,
+        description: details.description,
+        contact_method: details.contactMethod
+      });
+    }
+    
     setDonateSellDialog({ isOpen: false, itemId: '', itemName: '' });
   };
 
@@ -208,9 +197,9 @@ const Pantry = () => {
                   <Input
                     id="quantity"
                     type="number"
-                    placeholder="0"
+                    placeholder="1"
                     value={newItem.quantity}
-                    onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
+                    onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value) || 0})}
                   />
                 </div>
                 
@@ -237,8 +226,8 @@ const Pantry = () => {
                 <Input
                   id="expiry"
                   type="date"
-                  value={newItem.expiryDate}
-                  onChange={(e) => setNewItem({...newItem, expiryDate: e.target.value})}
+                  value={newItem.expiry_date}
+                  onChange={(e) => setNewItem({...newItem, expiry_date: e.target.value})}
                 />
               </div>
               
@@ -302,15 +291,15 @@ const Pantry = () => {
               </div>
               
               {/* Details */}
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Quantity: <span className="font-medium text-foreground">{item.quantity} {item.unit}</span>
-                </p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  <span>Expires: {new Date(item.expiryDate).toLocaleDateString()}</span>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Quantity: <span className="font-medium text-foreground">{item.quantity} {item.unit}</span>
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>Expires: {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'No expiry'}</span>
+                  </div>
                 </div>
-              </div>
               
               {/* Actions */}
               <div className="flex gap-2 pt-2">
@@ -338,7 +327,12 @@ const Pantry = () => {
         ))}
       </div>
 
-      {filteredItems.length === 0 && (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading pantry items...</p>
+        </div>
+      ) : filteredItems.length === 0 ? (
         <div className="text-center py-12">
           <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">No items found</h3>
@@ -346,7 +340,7 @@ const Pantry = () => {
             {searchTerm ? 'Try adjusting your search' : 'Add your first pantry item to get started'}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Donate/Sell Dialog */}
       <DonateSellDialog
